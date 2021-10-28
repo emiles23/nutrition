@@ -9,7 +9,9 @@
         />
       </div>
     </div>
+
     <div class="grid grid-cols-12 min-h-screen">
+      <!-- Sidebar -->
       <div class="col-span-2 bg-white shadow min-h-screen">
         <div class="mx-auto py-8 px-4">
           <h1 class="text-3xl font-bold text-gray-900 pb-7">Dashboard</h1>
@@ -30,102 +32,93 @@
           </div>
         </div>
       </div>
-      <div class="col-span-10">
-        <div class="w-11/12 mx-auto px-1 py-20">
+      <!-- Sidebar  End-->
+      <div class="col-span-10 p-10">
+        <div class="grid grid-cols-12 gap-10 rounded-lg px-5">
           <div
-            class="border-4 border-dashed border-gray-200 rounded-lg h-96 px-5"
+            class="
+              grid grid-cols-12
+              col-span-7
+              gap-4
+              border-2 border-green-600
+              py-20
+              px-5
+            "
           >
-            <div class="grid grid-cols-12 py-10 gap-4">
-              <div
-                v-for="(field, i) in fields"
-                :key="i"
-                :class="field.type == 'text' ? 'col-span-2' : 'col-span-4'"
+            <!-- div of the input -->
+            <div v-for="(field, i) in fields" :key="i" class="col-span-6">
+              <label v-if="Array.isArray(field.label)">{{
+                field.label[getValue(field.labelDependantValue)]
+              }}</label>
+
+              <label v-else> {{ field.label }}</label>
+
+              <!-- input -->
+              <input-nutrition
+                v-if="isTextOrNumber(field.type)"
+                required
+                :type="field.type"
+                :placeholder="field.placeholder"
+                v-model="field.value"
+                @input="(v) => setValue(field.name, v, field.type)"
+              />
+              <label class="text-red-500" v-if="errors[field.name]">{{
+                errors[field.name]
+              }}</label>
+              <!-- input End -->
+              <!-- select -->
+              <select-nutrition
+                v-if="field.type == 'select'"
+                v-model="field.value"
+                @change="(v) => setValue(field.name, v, field.type)"
               >
-                <input
-                  v-if="['text', 'number'].includes(field.type)"
-                  class="
-                    appearance-none
-                    rounded-none
-                    relative
-                    block
-                    w-full
-                    px-3
-                    py-2
-                    border border-gray-300
-                    placeholder-gray-500
-                    text-gray-900
-                    focus:outline-none
-                    focus:ring-indigo-500
-                    focus:border-indigo-500
-                    focus:z-10
-                    sm:text-sm
-                  "
-                  :type="field.type"
-                  :placeholder="field.label"
-                  v-model="field.value"
-                  @input="setValue(field.name, field.value)"
-                />
-                <select
-                  v-if="field.type == 'select'"
-                  @change="setValue(field.name, field.value)"
-                  v-model="field.value"
-                  class="
-                    w-full
-                    px-3
-                    py-2
-                    border border-gray-300
-                    placeholder-gray-500
-                    text-gray-900
-                    focus:outline-none
-                    focus:ring-indigo-500
-                    focus:border-indigo-500
-                  "
+                <option
+                  v-for="(option, i) in field.options"
+                  :key="i"
+                  :value="option.value"
                 >
-                  <option
-                    v-for="(option, i) in field.options"
-                    :key="i"
-                    :value="option.value"
-                  >
-                    {{ option.label }}
-                  </option>
-                </select>
-              </div>
-            </div>
-            <div class="flex items-center justify-center">
-              <div>
-                <h1 v-if="idealWeight > 0">
-                  El peso que debe tener es: {{ idealWeight }}
-                </h1>
-                <h1 v-if="estatura > 0 && peso > 0" class="">
-                  Su masa corporal es de: {{ bodyMass }}
-                </h1>
-                <h1 v-if="dailyCalories > 0">
-                  las calorias que quema al dia son: {{ dailyCalories }} Kcal
-                </h1>
-                <h1 v-if="percentageLoss > 0">
-                  las calorias que debe consumir para rebajar son:
-                  {{ caloriesConsumed }} Kcal
-                </h1>
-                <h1 v-if="proteinsToConsume > 0">
-                  La cantidad de proteína que debe consumir es:
-                  {{ proteinsToConsume }}gramos que equivalen a
-                  {{ caloriesForProtein }} Kcal
-                </h1>
-                <h1 v-if="greaseToConsume > 0">
-                  La cantidad de grasas que debe consumir es:
-                  {{ greaseToConsume }} gramos que equivalen a
-                  {{ caloriesForGrease }} Kcal
-                </h1>
-                <h1 v-if="percentageLoss > 0">
-                  La cantidad de carbohidratos de que debe consumir es:
-                  {{ carbohydratesToConsume }} gramos que equivalen a
-                  {{ caloriesForCarbohydrates }} Kcal
-                </h1>
-              </div>
+                  {{ option.placeholder }}
+                </option>
+              </select-nutrition>
+              <!-- select End-->
             </div>
           </div>
-          <!-- /End replace -->
+          <div class="col-span-5 gap-4 border-2 border-green-600 py-20 px-5">
+            <template v-if="showResults()">
+              <div class="flex items-center justify-center">
+                <div>
+                  <h1>El peso que debe tener es: {{ idealWeight }}kilos</h1>
+                  <h1>Su masa corporal es de: {{ bodyMass }}</h1>
+                  <h1>
+                    las calorias que quema al dia son:
+                    {{ dailyCalories }} Kcal
+                  </h1>
+                  <h1>
+                    las calorias que debe consumir para rebajar son:
+                    {{ caloriesConsumed }} Kcal
+                  </h1>
+                  <h1>
+                    La cantidad de proteína que debe consumir es:
+                    {{ proteinsToConsume }}gramos que equivalen a
+                    {{ caloriesForProtein }} Kcal
+                  </h1>
+                  <h1>
+                    La cantidad de grasas que debe consumir es:
+                    {{ greaseToConsume }} gramos que equivalen a
+                    {{ caloriesForGrease }} Kcal
+                  </h1>
+                  <h1>
+                    La cantidad de carbohidratos de que debe consumir es:
+                    {{ carbohydratesToConsume }} gramos que equivalen a
+                    {{ caloriesForCarbohydrates }} Kcal
+                  </h1>
+                </div>
+              </div>
+            </template>
+          </div>
         </div>
+
+        <!-- /End replace -->
       </div>
     </div>
   </div>
@@ -134,10 +127,14 @@
 
 <script>
 import Arrow from "@/Components/Icons/Arrow";
+import InputNutrition from "@/Components/InputNutrition";
+import SelectNutrition from "@/Components/SelectNutrition";
 
 export default {
   components: {
     Arrow,
+    InputNutrition,
+    SelectNutrition,
   },
 
   data() {
@@ -148,48 +145,81 @@ export default {
       percentageLoss: 0,
       proteinas: 0,
       grasa: 0,
+      desirableWeight: 0,
       fields: [
         {
           name: "peso",
-          type: "text",
-          label: "Ingrese peso",
+          type: "number",
+          label: "Peso",
+          placeholder: "Ingrese peso",
           value: "",
         },
         {
           name: "estatura",
-          type: "text",
-          label: "Ingrese estatura",
+          type: "number",
+          label: "Estatura",
+          placeholder: "Ingrese estatura",
           value: "",
         },
-
+        {
+          name: "sex",
+          type: "select",
+          label: "Sexo",
+          value: 0,
+          options: [
+            { placeholder: "Seleccione un sexo", value: 0 },
+            { placeholder: "Femenino", value: 1 },
+            { placeholder: "Masculino", value: 2 },
+          ],
+        },
+        {
+          name: "desirableWeight",
+          type: "select",
+          label: "Peso deseado ",
+          value: 0,
+          options: [
+            { placeholder: " Seleccione peso deseado", value: 0 },
+            { placeholder: "Perder peso", value: 1 },
+            { placeholder: "Ganar peso", value: 2 },
+          ],
+        },
         {
           name: "proteinas",
-          type: "text",
-          label: "Ingrese las proteínas a cosumir en el rango 1.8 - 2.5",
+          type: "number",
+          label: [
+            "Seleccione una opcion en peso deseado",
+            "Proteína rango (1.8 - 2.5)",
+            "Proteína rango (2.5 - 3.5)",
+          ],
+          labelDependantValue: "desirableWeight",
+          placeholder: "Ingrese la cantidad de proteinas",
           value: "",
         },
 
         {
           name: "grasa",
-          type: "text",
-          label: "Ingrese las grasa a cosumir en el rango 0.5 - 1.5",
+          type: "number",
+          label: [
+            "Seleccione una opcion en peso deseado",
+            "Proteína rango (0.5 - 1.5)",
+            "Proteína rango (1.5 - 2.5)",
+          ],
+          labelDependantValue: "desirableWeight",
+          placeholder: "Ingrese la cantidad de grasa",
           value: "",
         },
-
-        // { name: "numero", type: "number", label: "Ingrese numero", value: ""},
-
         {
           name: "ejercicio",
           type: "select",
-          label: "Seleccione",
+          label: "Entrenamiento",
           value: 0,
           options: [
-            { label: "Seleccione", value: 0 },
-            { label: "Poco o ningun ejerccio", value: 1.2 },
-            { label: "Ejerccio ligero (1 - 3 dias)", value: 1.4 },
-            { label: "Ejerccio moderado (3 - 5 dias)", value: 1.6 },
-            { label: "Ejerccio fuerte (6 - 7 dias)", value: 1.8 },
-            { label: "Ejerccio muy fuerte (dos veces al dia)", value: 2 },
+            { placeholder: "Seleccione", value: 0 },
+            { placeholder: "Poco o ningun ejerccio", value: 1.2 },
+            { placeholder: "Ejerccio ligero (1 - 3 dias)", value: 1.4 },
+            { placeholder: "Ejerccio moderado (3 - 5 dias)", value: 1.6 },
+            { placeholder: "Ejerccio fuerte (6 - 7 dias)", value: 1.8 },
+            { placeholder: "Ejerccio muy fuerte (dos veces al dia)", value: 2 },
           ],
         },
         {
@@ -198,13 +228,27 @@ export default {
           label: "Seleccione porcentaje deseado",
           value: 0,
           options: [
-            { label: "Seleccione porcentaje deseado", value: 0 },
-            { label: "Bajar de peso en 12 meses 10%", value: 0.1 },
-            { label: "Bajar de peso en 6 meses 20%", value: 0.2 },
-            { label: "Bajar de peso en 3 meses 30%)", value: 0.3 },
+            { placeholder: "Seleccione porcentaje deseado", value: 0 },
+            { placeholder: "Bajar el  10% por semana", value: 0.1 },
+            { placeholder: "Bajar el  20% por semana", value: 0.2 },
+            { placeholder: "Bajar el  30% por semana", value: 0.3 },
           ],
         },
       ],
+
+      bodyMassIndex: [
+        { sex: "female", interval: 20 - 25, type: "normalWeight" },
+        { sex: "female", interval: 25 - 30, type: "overWeight" },
+        { sex: "female", interval: 30 - 40, type: "obesity" },
+        { sex: "female", interval: 40, type: "morbidObesity" },
+
+        { sex: "male", interval: 20 - 27, type: "normalWeight" },
+        { sex: "male", interval: 27 - 30, type: "overWeight" },
+        { sex: "male", interval: 30 - 40, type: "obesity" },
+        { sex: "male", interval: 40, type: "morbidObesity" },
+      ],
+
+      errors: {},
     };
   },
 
@@ -257,16 +301,56 @@ export default {
     },
 
     // grams of Carbohydrates to be consumed
-    carbohydratesToConsume(){
+    carbohydratesToConsume() {
       return Math.round(this.caloriesForCarbohydrates / 4);
     },
-
   },
 
   methods: {
-    setValue(name, value) {
+    setValue(name, value, type) {
+      console.log(name, value);
+      this.validate(name, type, value);
       this[name] = value;
+    },
+
+    getValue(name) {
+      return this[name];
+    },
+
+    showResults() {
+     return (
+       this.peso != "" && 
+       this.estatura != "" &&
+       this.ejercicio != "" &&
+       this.percentageLoss != "" &&
+       this.proteinas != "" &&
+       this.grasa != ""
+     );
+    },
+
+    isTextOrNumber(type) {
+      return ["text", "number"].includes(type);
+    },
+
+    validate(name, type, value) {
+      if (this.isTextOrNumber(type)) {
+        if (value == "") {
+          this.errors[name] = "El campo no debe estar vacio";
+        } else if (value <= 0) {
+          this.errors[name] = "El numero debe ser mayor a 0";
+        } else {
+          delete this.errors[name];
+        }
+      }
     },
   },
 };
 </script>
+
+<style>
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+</style>
