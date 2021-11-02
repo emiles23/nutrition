@@ -13,7 +13,7 @@
     <div style="height: 88vh" class="grid grid-cols-12">
       <!-- Sidebar -->
       <div class="col-span-2 bg-primary-500 py-8 px-4">
-        <h1 class="text-3xl font-bold text-gray-900 pb-7">Dashboard</h1>
+        <h1 class="text-3xl font-bold text-white pb-7">Dashboard</h1>
         <div class="ml-2 flex space-x-4">
           <a
             href="#"
@@ -28,11 +28,11 @@
           >
         </div>
       </div>
-
       <!-- Sidebar  End-->
+
       <div class="col-span-10 px-14 flex items-center">
-        <div class="grid grid-cols-12 gap-5 rounded-lg">
-          <div class="col-span-5 border-2 border-secondary-600 py-5 px-3">
+        <div class="grid grid-cols-12 gap-1 rounded-lg">
+          <div class="col-span-5 border border-secondary-400 py-5 px-3">
             <!-- div of the input -->
             <div class="grid grid-cols-2 gap-3">
               <template v-for="(field, i) in fields">
@@ -56,9 +56,9 @@
                     :type="field.type"
                     :placeholder="field.placeholder"
                     v-model="field.value"
-                    @input="(v) => setValue(field.name, v, field.type)"
+                    @input="(v) => setValue(field.name, v, field.type, field.validation)"
                   />
-                  <label class="text-red-500" v-if="errors[field.name]">{{
+                  <label class="text-red-600" v-if="errors[field.name]">{{
                     errors[field.name]
                   }}</label>
                   <!-- input End -->
@@ -89,97 +89,154 @@
           </div>
 
           <div class="col-span-7 flex items-center pl-8">
-            <div v-if="!showResults()" class="w-full">
-              <!-- v-if="showResults()" -->
-              <base-table class="mt-0">
-                <base-caption
-                  >Indice de Masa Corporal
-                  <strong class="text-primary-500"> (IMC)</strong></base-caption
-                >
-                <tr>
-                  <base-td><strong class="text-primary-500">IMC</strong> Ideal</base-td>
-                  <base-td><strong class="text-primary-500">IMC</strong> Actual</base-td>
-                  <base-td>Caracteristica</base-td>
-                </tr>
-
-                <tr>
-                  <base-td>Celda 4</base-td>
-                  <base-td>{{ bodyMass }}</base-td>
-                  <base-td>nose</base-td>
-                </tr>
-              </base-table>
-
-              <base-table>
-                <base-caption> Peso a perder</base-caption>
-                <tr>
-                  <base-td>Peso Actal</base-td>
-                  <base-td>Peso Ideal</base-td>
-                  <base-td>kilos a Perder</base-td>
-                </tr>
-
-                <tr>
-                  <base-td>{{ peso }} <strong class="text-secondary-400">kl</strong></base-td>
-                  <base-td>{{ idealWeight }} <strong class="text-secondary-400">kl</strong></base-td>
-                  <base-td>nose<strong class="text-secondary-400">kl</strong></base-td>
-                </tr>
-              </base-table>
-
-              <base-table>
-                <base-caption
-                  >Kilocalorías
-                  <strong class="text-tertiary-600">
-                    (Kcal)</strong
-                  ></base-caption
-                >
-
-                <tr>
-                  <base-td>cal quemada al dia</base-td>
-                  <base-td><strong class="text-tertiary-600">
-                    (Kcal)</strong> a consumida al dia</base-td>
-                </tr>
-
-                <tr>
-                  <base-td>{{ dailyCalories }}</base-td>
-                  <base-td> {{ caloriesConsumed }}</base-td>
-                </tr>
-              </base-table>
-
-              <base-table>
-                <base-caption
-                  >Gramos equivalentes a
-                  <strong class="text-primary-600"> Kcal</strong>
-                </base-caption>
-                <tr>
-                  <base-td>Proteínas /<strong class="text-tertiary-600">
-                    Kcal</strong> </base-td>
-                  <base-td>Grasas / <strong class="text-tertiary-600">
-                  Kcal</strong> </base-td>
-                  <base-td>Carbohidratos / <strong class="text-tertiary-600">
-                    Kcal</strong> </base-td>
-                </tr>
-
-                <tr>
-                  <base-td
-                    >{{ proteinsToConsume }}gr/{{
-                      caloriesForProtein
-                    }}<strong class="text-tertiary-600">
-                  Kcal</strong></base-td
+            <template v-if="!showResults()">
+              <div class="w-full">
+                <h1 class="text-2xl text-center mb-5 text-primary-600">
+                  Resultados del analisis
+                </h1>
+                <!-- v-if="showResults()" -->
+                <base-table class="mt-0">
+                  <base-caption
+                    >Indice de Masa Corporal
+                    <strong class="text-primary-500">
+                      (IMC)</strong
+                    ></base-caption
                   >
-                  <base-td
-                    >{{ greaseToConsume }}gr/{{
-                      caloriesForGrease
-                    }}<strong class="text-tertiary-600">
-                    Kcal</strong></base-td
+                  <tr>
+                    <base-td
+                      ><strong class="text-primary-500">IMC</strong>
+                      Ideal</base-td
+                    >
+                    <base-td
+                      ><strong class="text-primary-500">IMC</strong>
+                      Actual</base-td
+                    >
+                    <base-td>Caracteristica</base-td>
+                  </tr>
+
+                  <tr>
+                    <base-td>Celda 4</base-td>
+                    <base-td>{{ bodyMass }}</base-td>
+                    <base-td>{{ characteristicImc }}</base-td>
+                  </tr>
+                </base-table>
+
+                <base-table>
+                  <base-caption>
+                    Peso a perder
+                    <strong class="text-crabohydrates-400"
+                      >(Kg)</strong
+                    ></base-caption
                   >
-                  <base-td
-                    >{{ carbohydratesToConsume }}gr / {{
-                      caloriesForCarbohydrates
-                    }}<strong class="text-tertiary-600">
-                    Kcal</strong></base-td
+                  <tr>
+                    <base-td
+                      ><strong class="text-protein-500">Peso</strong>
+                      Actual</base-td
+                    >
+                    <base-td
+                      ><strong class="text-protein-500">Peso</strong>
+                      Ideal</base-td
+                    >
+                    <base-td
+                      ><strong class="text-crabohydrates-400">Kg</strong> a
+                      Perder</base-td
+                    >
+                  </tr>
+
+                  <tr>
+                    <base-td>
+                      {{ peso }}
+                      <strong class="text-crabohydrates-400"
+                        >Kg</strong
+                      ></base-td
+                    >
+                    <base-td
+                      >{{ idealWeight }}
+                      <strong class="text-crabohydrates-400"
+                        >Kg</strong
+                      ></base-td
+                    >
+                    <base-td
+                      >{{ kgLose
+                      }}<strong class="text-crabohydrates-400">
+                        Kg</strong
+                      ></base-td
+                    >
+                  </tr>
+                </base-table>
+
+                <base-table>
+                  <base-caption
+                    >Kilocalorías
+                    <strong class="text-grease-600">
+                      (Kcal)</strong
+                    ></base-caption
                   >
-                </tr>
-              </base-table>
-            </div>
+
+                  <tr>
+                    <base-td>
+                      <strong class="text-grease-600"> Kcal</strong> quemada al
+                      dia</base-td
+                    >
+                    <base-td
+                      ><strong class="text-grease-600"> Kcal</strong> a
+                      consumida al dia</base-td
+                    >
+                  </tr>
+
+                  <tr>
+                    <base-td>{{ dailyCalories }}</base-td>
+                    <base-td> {{ caloriesConsumed }}</base-td>
+                  </tr>
+                </base-table>
+
+                <base-table>
+                  <base-caption
+                    >Gramos
+                    <strong class="text-protein-500"> (gr)</strong> equivalentes
+                    a
+                    <strong class="text-grease-600"> Kcal</strong>
+                  </base-caption>
+                  <tr>
+                    <base-td
+                      ><strong class="text-protein-400">Proteínas </strong> /
+                      <strong class="text-grease-600"> Kcal</strong>
+                    </base-td>
+                    <base-td
+                      ><strong class="text-grease-500">Grasas </strong> /
+                      <strong class="text-grease-600"> Kcal</strong>
+                    </base-td>
+                    <base-td
+                      ><strong class="text-crabohydrates-500"
+                        >Carbohidratos</strong
+                      >
+                      / <strong class="text-grease-600"> Kcal</strong>
+                    </base-td>
+                  </tr>
+
+                  <tr>
+                    <base-td
+                      >{{ proteinsToConsume }}
+                      <strong class="text-protein-500">gr</strong> /
+                      {{ caloriesForProtein
+                      }}<strong class="text-grease-600"> Kcal</strong></base-td
+                    >
+                    <base-td
+                      >{{ greaseToConsume }}
+                      <strong class="text-protein-500">gr</strong> /
+                      {{ caloriesForGrease
+                      }}<strong class="text-grease-600"> Kcal</strong></base-td
+                    >
+                    <base-td
+                      >{{ carbohydratesToConsume }}
+                      <strong class="text-protein-500">gr</strong> /
+                      {{ caloriesForCarbohydrates
+                      }}<strong class="text-grease-600"> Kcal</strong></base-td
+                    >
+                  </tr>
+                </base-table>
+              </div>
+            </template>
 
             <img
               v-else
@@ -228,16 +285,17 @@ export default {
         {
           name: "peso",
           type: "number",
-          label: "Peso",
+          label: "Peso: Kilogramos",
           placeholder: "Ingrese peso",
           value: "",
         },
         {
           name: "estatura",
           type: "number",
-          label: "Estatura",
+          label: "Estatura: Metros (M)",
           placeholder: "Ingrese estatura",
           value: "",
+          validation: "metros"
         },
         {
           name: "sex",
@@ -316,19 +374,36 @@ export default {
         },
       ],
       errors: {},
-
-      bodyMassIndex: [
-        { from: 18.5, label: "Bajo de peso" },
-        { from: 18.5, to: 24.9, label: "Peso normal" },
-        { from: 25, to: 29.9, label: "Pre-obesidad o Sobrepeso" },
-        { from: 30, to: 34.9, label: "Obesidad clase I" },
-        { from: 35, to: 39.9, label: "Obesidad clase II" },
-        { from: 40, label: "Obesidad clase III" },
-      ],
     };
   },
 
   computed: {
+    // function body mass index (IMC)
+    bodyMass() {
+      return Math.round(this.peso / (this.estatura * this.estatura));
+    },
+  
+    
+    //  function ideal weight
+    idealWeight() {
+      return Math.round(21 * (this.estatura * this.estatura));
+    },
+
+         // characteristic of (IMC)
+    characteristicImc() {  
+        if (this.bodyMass < 18.5) return "Bajo de peso";            
+        if (this.bodyMass >= 18.5 && this.bodyMass <= 24.9) return "Peso normal";
+        if (this.bodyMass >= 25 && this.bodyMass <= 29.9) return "Pre-obesidad o Sobrepeso";          
+        if (this.bodyMass >= 30 && this.bodyMass <= 34.9) return "Obesidad clase I";          
+        if (this.bodyMass >= 35 && this.bodyMass <= 39.9) return "Obesidad clase II";          
+        if (this.bodyMass >= 40 ) return "Obesidad clase III";               
+    },
+
+    // function kilograms to lose
+    kgLose() {
+      return (this.peso - this.idealWeight )
+    },
+
     dailyCalories() {
       return Math.round(this.peso * 22 * this.ejercicio);
     },
@@ -337,15 +412,6 @@ export default {
       return Math.round(
         this.dailyCalories - this.percentageLoss * this.dailyCalories
       );
-    },
-
-    bodyMass() {
-      // return Math.round(this.peso / Math.pow(this.estatura));
-      return Math.round(this.peso / (this.estatura * this.estatura));
-    },
-
-    idealWeight() {
-      return Math.round(21 * (this.estatura * this.estatura));
     },
 
     // calculate the protein to be consumed
@@ -383,9 +449,9 @@ export default {
   },
 
   methods: {
-    setValue(name, value, type) {
+    setValue(name, value, type , validation) {
       console.log(name, value);
-      this.validate(name, type, value);
+      this.validate(name, type, value, validation);
       this[name] = value;
     },
     getValue(name) {
@@ -396,13 +462,16 @@ export default {
       return ["text", "number"].includes(type);
     },
 
-    validate(name, type, value) {
+    validate(name, type, value, validation) {
       if (this.isTextOrNumber(type)) {
         if (value == "") {
           this.errors[name] = "No debe estar vacio";
         } else if (value <= 0) {
-          this.errors[name] = "El valo debe ser mayor a 0";
-        } else {
+          this.errors[name] = "El valor debe ser mayor a 0";
+        } else if (validation =="metros" && value  % 1 == 0) {
+          this.errors[name] = "El valor debe ser en M";   
+        }  
+         else {
           delete this.errors[name];
         }
       }
@@ -419,7 +488,7 @@ export default {
         Object.keys(this.errors).length === 0
       );
     },
-  },
+  }
 };
 </script>
 

@@ -4,10 +4,12 @@
       w-full
       px-3
       py-2
-      border border-gray-300
-      placeholder-gray-500
+      border border-secondary-400
+      placeholder-primary-500
+       focus:ring-secondary-500
+      focus:ring-1
       text-gray-900
-      focus:outline-none focus:ring-indigo-500 focus:border-indigo-500
+      focus:outline-none
     "
     @change="onChange"
   >
