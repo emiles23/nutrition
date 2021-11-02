@@ -5,9 +5,9 @@
       rounded-none
       relative
       block
-      w-full
       px-3
       py-2
+      w-full
       border border-gray-300
       placeholder-gray-500
       text-gray-900

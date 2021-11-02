@@ -18,7 +18,7 @@
 export default {
   methods: {
     onChange(v) {
-      this.$emit('change', v.target.value)
+      this.$emit("change", v.target.value);
     },
   },
 };

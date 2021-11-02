@@ -15,7 +15,7 @@ module.exports = {
             primary: {
                 600: "#029400",
                 500: "#55c60c",
-                400: "#8cfa4e",
+                400: "#9edf58",
             },
 
             secondary: {
@@ -23,6 +23,15 @@ module.exports = {
                 500: "#9d66b1",
                 400: "#cf95e3",
             },
+
+            tertiary: {
+                600: "#bdc72b",
+                500: "#f2fa61",
+                400: "#ffff94",
+
+            },
+
+            
         },
     }
 }

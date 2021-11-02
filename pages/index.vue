@@ -10,94 +10,95 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-12 min-h-screen">
+    <div style="height: 88vh" class="grid grid-cols-12">
       <!-- Sidebar -->
-      <div class="col-span-2 bg-white shadow min-h-screen bg-primary-500">
-        <div class="mx-auto py-8 px-4">
-          <h1 class="text-3xl font-bold text-gray-900 pb-7">Dashboard</h1>
-          <div class="ml-2 flex items-baseline space-x-4">
-            <a
-              href="#"
-              class="
-                text-gray-900
-                hover:bg-gray-700 hover:text-white
-                py-2
-                px-6
-                rounded-md
-                text-sm
-                font-medium
-              "
-              >Calorias diarias</a
-            >
-          </div>
+      <div class="col-span-2 bg-primary-500 py-8 px-4">
+        <h1 class="text-3xl font-bold text-gray-900 pb-7">Dashboard</h1>
+        <div class="ml-2 flex space-x-4">
+          <a
+            href="#"
+            class="
+              text-gray-900
+              hover:bg-gray-700 hover:text-white
+              rounded-md
+              text-sm
+              font-medium
+            "
+            >Calorias diarias</a
+          >
         </div>
       </div>
+
       <!-- Sidebar  End-->
-      <div class="col-span-10 p-10">
-        <div class="grid grid-cols-12 gap-5 rounded-lg px-5">
-          <div
-            class="
-              grid grid-cols-12
-              col-span-5
-              gap-4
-              border-2 border-secondary-600
-              py-20
-              px-3
-            "
-          >
+      <div class="col-span-10 px-14 flex items-center">
+        <div class="grid grid-cols-12 gap-5 rounded-lg">
+          <div class="col-span-5 border-2 border-secondary-600 py-5 px-3">
             <!-- div of the input -->
-            <div v-for="(field, i) in fields" :key="i" class="col-span-6">
-              <template
-                v-if="
-                  !field.visualDependant ||
-                  (field.visualDependant &&
-                    getValue(field.nameDependantValue) > 0)
-                "
-              >
-                <label v-if="Array.isArray(field.label)">{{
-                  field.label[getValue(field.nameDependantValue)]
-                }}</label>
-
-                <label v-else> {{ field.label }}</label>
-
-                <!-- input -->
-                <input-nutrition
-                  v-if="isTextOrNumber(field.type)"
-                  :type="field.type"
-                  :placeholder="field.placeholder"
-                  v-model="field.value"
-                  @input="(v) => setValue(field.name, v, field.type)"
-                />
-                <label class="text-red-500" v-if="errors[field.name]">{{
-                  errors[field.name]
-                }}</label>
-                <!-- input End -->
-                <!-- select -->
-                <select-nutrition
-                  v-if="field.type == 'select'"
-                  v-model="field.value"
-                  @change="(v) => setValue(field.name, v, field.type)"
+            <div class="grid grid-cols-2 gap-3">
+              <template v-for="(field, i) in fields">
+                <div
+                  :key="i"
+                  v-if="
+                    !field.visualDependant ||
+                    (field.visualDependant &&
+                      getValue(field.nameDependantValue) > 0)
+                  "
                 >
-                  <option
-                    v-for="(option, i) in field.options"
-                    :key="i"
-                    :value="option.value"
+                  <label v-if="Array.isArray(field.label)">{{
+                    field.label[getValue(field.nameDependantValue)]
+                  }}</label>
+
+                  <label v-else> {{ field.label }}</label>
+
+                  <!-- input -->
+                  <input-nutrition
+                    v-if="isTextOrNumber(field.type)"
+                    :type="field.type"
+                    :placeholder="field.placeholder"
+                    v-model="field.value"
+                    @input="(v) => setValue(field.name, v, field.type)"
+                  />
+                  <label class="text-red-500" v-if="errors[field.name]">{{
+                    errors[field.name]
+                  }}</label>
+                  <!-- input End -->
+                  <!-- select -->
+                  <select-nutrition
+                    v-if="field.type == 'select'"
+                    v-model="field.value"
+                    @change="(v) => setValue(field.name, v, field.type)"
                   >
-                    {{ option.placeholder }}
-                  </option>
-                </select-nutrition>
-                <!-- select End-->
+                    <option
+                      v-for="(option, i) in field.options"
+                      :key="i"
+                      :value="option.value"
+                    >
+                      {{ option.placeholder }}
+                    </option>
+                  </select-nutrition>
+                  <!-- select End-->
+                </div>
               </template>
             </div>
+
+            <img
+              class=""
+              src="https://lh3.googleusercontent.com/proxy/elTAD8oIYdor8VheDAnOmTRPirn9pI2QaM2WZA6FMkZ0SULF9BqPqKDuFrJBVJXSno-BleDV2UfwzT7kON4jrQD9_dgh7zPSJnkBgznZlUmCpiEcSQIY50UmsR7mA5b5wE0-fw"
+              alt="Workflow"
+            />
           </div>
-          <div class="col-span-7 gap-4 border-2 border-secondary-600 p-3">
-            <template>
+
+          <div class="col-span-7 flex items-center pl-8">
+            <div v-if="!showResults()" class="w-full">
               <!-- v-if="showResults()" -->
-              <base-table>
-                <base-caption> Indice de Masa Corporal (IMC)</base-caption>
+              <base-table class="mt-0">
+                <base-caption
+                  >Indice de Masa Corporal
+                  <strong class="text-primary-500"> (IMC)</strong></base-caption
+                >
                 <tr>
-                  <base-td>IMC Ideal</base-td>
-                  <base-td>IMC Actual</base-td>
+                  <base-td><strong class="text-primary-500">IMC</strong> Ideal</base-td>
+                  <base-td><strong class="text-primary-500">IMC</strong> Actual</base-td>
                   <base-td>Caracteristica</base-td>
                 </tr>
 
@@ -117,17 +118,24 @@
                 </tr>
 
                 <tr>
-                  <base-td>{{ peso }} kl</base-td>
-                  <base-td>{{ idealWeight }} kl</base-td>
-                  <base-td>nose</base-td>
+                  <base-td>{{ peso }} <strong class="text-secondary-400">kl</strong></base-td>
+                  <base-td>{{ idealWeight }} <strong class="text-secondary-400">kl</strong></base-td>
+                  <base-td>nose<strong class="text-secondary-400">kl</strong></base-td>
                 </tr>
               </base-table>
+
               <base-table>
-                <base-caption>Kilocalorías (Kcal)</base-caption>
+                <base-caption
+                  >Kilocalorías
+                  <strong class="text-tertiary-600">
+                    (Kcal)</strong
+                  ></base-caption
+                >
 
                 <tr>
                   <base-td>cal quemada al dia</base-td>
-                  <base-td>Kcal a consumida al dia</base-td>
+                  <base-td><strong class="text-tertiary-600">
+                    (Kcal)</strong> a consumida al dia</base-td>
                 </tr>
 
                 <tr>
@@ -135,38 +143,55 @@
                   <base-td> {{ caloriesConsumed }}</base-td>
                 </tr>
               </base-table>
+
               <base-table>
-                <base-caption>Gramos equivalentes a Kcal</base-caption>
+                <base-caption
+                  >Gramos equivalentes a
+                  <strong class="text-primary-600"> Kcal</strong>
+                </base-caption>
                 <tr>
-                  <base-td>Proteínas/Kcal</base-td>
-                  <base-td>Grasas/Kcal</base-td>
-                  <base-td>Carbohidratos/Kcal</base-td>
+                  <base-td>Proteínas /<strong class="text-tertiary-600">
+                    Kcal</strong> </base-td>
+                  <base-td>Grasas / <strong class="text-tertiary-600">
+                  Kcal</strong> </base-td>
+                  <base-td>Carbohidratos / <strong class="text-tertiary-600">
+                    Kcal</strong> </base-td>
                 </tr>
 
                 <tr>
                   <base-td
                     >{{ proteinsToConsume }}gr/{{
                       caloriesForProtein
-                    }}Kcal</base-td
+                    }}<strong class="text-tertiary-600">
+                  Kcal</strong></base-td
                   >
                   <base-td
                     >{{ greaseToConsume }}gr/{{
                       caloriesForGrease
-                    }}Kcal</base-td
+                    }}<strong class="text-tertiary-600">
+                    Kcal</strong></base-td
                   >
                   <base-td
-                    >{{ carbohydratesToConsume }}gr/{{
+                    >{{ carbohydratesToConsume }}gr / {{
                       caloriesForCarbohydrates
-                    }}Kcal</base-td
+                    }}<strong class="text-tertiary-600">
+                    Kcal</strong></base-td
                   >
                 </tr>
               </base-table>
-            </template>
+            </div>
+
+            <img
+              v-else
+              class="mt-4"
+              src="https://www.nutrasalud.es/media/uploads/noticias/alimentos_saludables.jpg"
+              alt="Workflow"
+            />
           </div>
         </div>
-
-        <!-- /End replace -->
       </div>
+
+      <!-- /End replace -->
     </div>
   </div>
 </template>
@@ -374,9 +399,9 @@ export default {
     validate(name, type, value) {
       if (this.isTextOrNumber(type)) {
         if (value == "") {
-          this.errors[name] = "El campo no debe estar vacio";
+          this.errors[name] = "No debe estar vacio";
         } else if (value <= 0) {
-          this.errors[name] = "El numero debe ser mayor a 0";
+          this.errors[name] = "El valo debe ser mayor a 0";
         } else {
           delete this.errors[name];
         }
