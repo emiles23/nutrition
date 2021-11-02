@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="bg-gray-800 min-w-full px-10">
+    <div class="bg-primary-500 min-w-full px-10">
       <div class="flex items-center h-20">
         <img
           class="h-8 w-8"
@@ -12,7 +12,7 @@
 
     <div class="grid grid-cols-12 min-h-screen">
       <!-- Sidebar -->
-      <div class="col-span-2 bg-white shadow min-h-screen">
+      <div class="col-span-2 bg-white shadow min-h-screen bg-primary-500">
         <div class="mx-auto py-8 px-4">
           <h1 class="text-3xl font-bold text-gray-900 pb-7">Dashboard</h1>
           <div class="ml-2 flex items-baseline space-x-4">
@@ -34,86 +34,133 @@
       </div>
       <!-- Sidebar  End-->
       <div class="col-span-10 p-10">
-        <div class="grid grid-cols-12 gap-10 rounded-lg px-5">
+        <div class="grid grid-cols-12 gap-5 rounded-lg px-5">
           <div
             class="
               grid grid-cols-12
-              col-span-7
+              col-span-5
               gap-4
-              border-2 border-green-600
+              border-2 border-secondary-600
               py-20
-              px-5
+              px-3
             "
           >
             <!-- div of the input -->
             <div v-for="(field, i) in fields" :key="i" class="col-span-6">
-              <label v-if="Array.isArray(field.label)">{{
-                field.label[getValue(field.labelDependantValue)]
-              }}</label>
-
-              <label v-else> {{ field.label }}</label>
-
-              <!-- input -->
-              <input-nutrition
-                v-if="isTextOrNumber(field.type)"
-                required
-                :type="field.type"
-                :placeholder="field.placeholder"
-                v-model="field.value"
-                @input="(v) => setValue(field.name, v, field.type)"
-              />
-              <label class="text-red-500" v-if="errors[field.name]">{{
-                errors[field.name]
-              }}</label>
-              <!-- input End -->
-              <!-- select -->
-              <select-nutrition
-                v-if="field.type == 'select'"
-                v-model="field.value"
-                @change="(v) => setValue(field.name, v, field.type)"
+              <template
+                v-if="
+                  !field.visualDependant ||
+                  (field.visualDependant &&
+                    getValue(field.nameDependantValue) > 0)
+                "
               >
-                <option
-                  v-for="(option, i) in field.options"
-                  :key="i"
-                  :value="option.value"
+                <label v-if="Array.isArray(field.label)">{{
+                  field.label[getValue(field.nameDependantValue)]
+                }}</label>
+
+                <label v-else> {{ field.label }}</label>
+
+                <!-- input -->
+                <input-nutrition
+                  v-if="isTextOrNumber(field.type)"
+                  :type="field.type"
+                  :placeholder="field.placeholder"
+                  v-model="field.value"
+                  @input="(v) => setValue(field.name, v, field.type)"
+                />
+                <label class="text-red-500" v-if="errors[field.name]">{{
+                  errors[field.name]
+                }}</label>
+                <!-- input End -->
+                <!-- select -->
+                <select-nutrition
+                  v-if="field.type == 'select'"
+                  v-model="field.value"
+                  @change="(v) => setValue(field.name, v, field.type)"
                 >
-                  {{ option.placeholder }}
-                </option>
-              </select-nutrition>
-              <!-- select End-->
+                  <option
+                    v-for="(option, i) in field.options"
+                    :key="i"
+                    :value="option.value"
+                  >
+                    {{ option.placeholder }}
+                  </option>
+                </select-nutrition>
+                <!-- select End-->
+              </template>
             </div>
           </div>
-          <div class="col-span-5 gap-4 border-2 border-green-600 py-20 px-5">
-            <template v-if="showResults()">
-              <div class="flex items-center justify-center">
-                <div>
-                  <h1>El peso que debe tener es: {{ idealWeight }}kilos</h1>
-                  <h1>Su masa corporal es de: {{ bodyMass }}</h1>
-                  <h1>
-                    las calorias que quema al dia son:
-                    {{ dailyCalories }} Kcal
-                  </h1>
-                  <h1>
-                    las calorias que debe consumir para rebajar son:
-                    {{ caloriesConsumed }} Kcal
-                  </h1>
-                  <h1>
-                    La cantidad de proteína que debe consumir es:
-                    {{ proteinsToConsume }}gramos que equivalen a
-                    {{ caloriesForProtein }} Kcal
-                  </h1>
-                  <h1>
-                    La cantidad de grasas que debe consumir es:
-                    {{ greaseToConsume }} gramos que equivalen a
-                    {{ caloriesForGrease }} Kcal
-                  </h1>
-                  <h1>
-                    La cantidad de carbohidratos de que debe consumir es:
-                    {{ carbohydratesToConsume }} gramos que equivalen a
-                    {{ caloriesForCarbohydrates }} Kcal
-                  </h1>
-                </div>
-              </div>
+          <div class="col-span-7 gap-4 border-2 border-secondary-600 p-3">
+            <template>
+              <!-- v-if="showResults()" -->
+              <base-table>
+                <base-caption> Indice de Masa Corporal (IMC)</base-caption>
+                <tr>
+                  <base-td>IMC Ideal</base-td>
+                  <base-td>IMC Actual</base-td>
+                  <base-td>Caracteristica</base-td>
+                </tr>
+
+                <tr>
+                  <base-td>Celda 4</base-td>
+                  <base-td>{{ bodyMass }}</base-td>
+                  <base-td>nose</base-td>
+                </tr>
+              </base-table>
+
+              <base-table>
+                <base-caption> Peso a perder</base-caption>
+                <tr>
+                  <base-td>Peso Actal</base-td>
+                  <base-td>Peso Ideal</base-td>
+                  <base-td>kilos a Perder</base-td>
+                </tr>
+
+                <tr>
+                  <base-td>{{ peso }} kl</base-td>
+                  <base-td>{{ idealWeight }} kl</base-td>
+                  <base-td>nose</base-td>
+                </tr>
+              </base-table>
+              <base-table>
+                <base-caption>Kilocalorías (Kcal)</base-caption>
+
+                <tr>
+                  <base-td>cal quemada al dia</base-td>
+                  <base-td>Kcal a consumida al dia</base-td>
+                </tr>
+
+                <tr>
+                  <base-td>{{ dailyCalories }}</base-td>
+                  <base-td> {{ caloriesConsumed }}</base-td>
+                </tr>
+              </base-table>
+              <base-table>
+                <base-caption>Gramos equivalentes a Kcal</base-caption>
+                <tr>
+                  <base-td>Proteínas/Kcal</base-td>
+                  <base-td>Grasas/Kcal</base-td>
+                  <base-td>Carbohidratos/Kcal</base-td>
+                </tr>
+
+                <tr>
+                  <base-td
+                    >{{ proteinsToConsume }}gr/{{
+                      caloriesForProtein
+                    }}Kcal</base-td
+                  >
+                  <base-td
+                    >{{ greaseToConsume }}gr/{{
+                      caloriesForGrease
+                    }}Kcal</base-td
+                  >
+                  <base-td
+                    >{{ carbohydratesToConsume }}gr/{{
+                      caloriesForCarbohydrates
+                    }}Kcal</base-td
+                  >
+                </tr>
+              </base-table>
             </template>
           </div>
         </div>
@@ -129,12 +176,18 @@
 import Arrow from "@/Components/Icons/Arrow";
 import InputNutrition from "@/Components/InputNutrition";
 import SelectNutrition from "@/Components/SelectNutrition";
+import BaseTable from "@/Components/BaseTable";
+import BaseCaption from "@/Components/BaseCaption";
+import BaseTd from "@/Components/BaseTd";
 
 export default {
   components: {
     Arrow,
     InputNutrition,
     SelectNutrition,
+    BaseTable,
+    BaseCaption,
+    BaseTd,
   },
 
   data() {
@@ -186,12 +239,13 @@ export default {
         {
           name: "proteinas",
           type: "number",
+          visualDependant: true,
           label: [
             "Seleccione una opcion en peso deseado",
             "Proteína rango (1.8 - 2.5)",
             "Proteína rango (2.5 - 3.5)",
           ],
-          labelDependantValue: "desirableWeight",
+          nameDependantValue: "desirableWeight",
           placeholder: "Ingrese la cantidad de proteinas",
           value: "",
         },
@@ -199,12 +253,13 @@ export default {
         {
           name: "grasa",
           type: "number",
+          visualDependant: true,
           label: [
             "Seleccione una opcion en peso deseado",
             "Proteína rango (0.5 - 1.5)",
             "Proteína rango (1.5 - 2.5)",
           ],
-          labelDependantValue: "desirableWeight",
+          nameDependantValue: "desirableWeight",
           placeholder: "Ingrese la cantidad de grasa",
           value: "",
         },
@@ -225,30 +280,26 @@ export default {
         {
           name: "percentageLoss",
           type: "select",
-          label: "Seleccione porcentaje deseado",
+          label: "Ritmo de dieta",
           value: 0,
           options: [
-            { placeholder: "Seleccione porcentaje deseado", value: 0 },
+            { placeholder: "Seleccione % deseado", value: 0 },
             { placeholder: "Bajar el  10% por semana", value: 0.1 },
             { placeholder: "Bajar el  20% por semana", value: 0.2 },
             { placeholder: "Bajar el  30% por semana", value: 0.3 },
           ],
         },
       ],
+      errors: {},
 
       bodyMassIndex: [
-        { sex: "female", interval: 20 - 25, type: "normalWeight" },
-        { sex: "female", interval: 25 - 30, type: "overWeight" },
-        { sex: "female", interval: 30 - 40, type: "obesity" },
-        { sex: "female", interval: 40, type: "morbidObesity" },
-
-        { sex: "male", interval: 20 - 27, type: "normalWeight" },
-        { sex: "male", interval: 27 - 30, type: "overWeight" },
-        { sex: "male", interval: 30 - 40, type: "obesity" },
-        { sex: "male", interval: 40, type: "morbidObesity" },
+        { from: 18.5, label: "Bajo de peso" },
+        { from: 18.5, to: 24.9, label: "Peso normal" },
+        { from: 25, to: 29.9, label: "Pre-obesidad o Sobrepeso" },
+        { from: 30, to: 34.9, label: "Obesidad clase I" },
+        { from: 35, to: 39.9, label: "Obesidad clase II" },
+        { from: 40, label: "Obesidad clase III" },
       ],
-
-      errors: {},
     };
   },
 
@@ -312,20 +363,8 @@ export default {
       this.validate(name, type, value);
       this[name] = value;
     },
-
     getValue(name) {
       return this[name];
-    },
-
-    showResults() {
-     return (
-       this.peso != "" && 
-       this.estatura != "" &&
-       this.ejercicio != "" &&
-       this.percentageLoss != "" &&
-       this.proteinas != "" &&
-       this.grasa != ""
-     );
     },
 
     isTextOrNumber(type) {
@@ -343,14 +382,26 @@ export default {
         }
       }
     },
+
+    showResults() {
+      return (
+        this.peso != "" &&
+        this.estatura != "" &&
+        this.ejercicio != "" &&
+        this.percentageLoss != "" &&
+        this.proteinas != "" &&
+        this.grasa != "" &&
+        Object.keys(this.errors).length === 0
+      );
+    },
   },
 };
 </script>
 
 <style>
-input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button { 
-  -webkit-appearance: none; 
-  margin: 0; 
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 </style>
