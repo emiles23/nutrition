@@ -56,12 +56,12 @@
                     :type="field.type"
                     :placeholder="field.placeholder"
                     v-model="field.value"
-                    @input="(v) => setValue(field.name, v, field.type, field.validation)"
-                  />
-                  <label class="text-red-600" v-if="errors[field.name]">{{
-                    errors[field.name]
-                  }}</label>
-                  <!-- input End -->
+                    @input="
+                      (v) =>
+                        setValue(field.name, v, field.type, field.validation)
+                    "
+                  /><!-- input End -->
+
                   <!-- select -->
                   <select-nutrition
                     v-if="field.type == 'select'"
@@ -74,22 +74,21 @@
                       :value="option.value"
                     >
                       {{ option.placeholder }}
-                    </option>
+                    </option> 
                   </select-nutrition>
-                  <!-- select End-->
+                    <!-- select End-->
+                  <label class="text-red-600" v-if="errors[field.name]">{{
+                    errors[field.name]
+                  }}</label>
                 </div>
               </template>
             </div>
 
-            <img
-              class=""
-              src="https://lh3.googleusercontent.com/proxy/elTAD8oIYdor8VheDAnOmTRPirn9pI2QaM2WZA6FMkZ0SULF9BqPqKDuFrJBVJXSno-BleDV2UfwzT7kON4jrQD9_dgh7zPSJnkBgznZlUmCpiEcSQIY50UmsR7mA5b5wE0-fw"
-              alt="Workflow"
-            />
+            <img src="~assets/frutas.png" alt="Workflow" />
           </div>
 
           <div class="col-span-7 flex items-center pl-8">
-            <template v-if="!showResults()">
+            <template v-if="showResults()">
               <div class="w-full">
                 <h1 class="text-2xl text-center mb-5 text-primary-600">
                   Resultados del analisis
@@ -115,7 +114,7 @@
                   </tr>
 
                   <tr>
-                    <base-td>Celda 4</base-td>
+                    <base-td>21</base-td>
                     <base-td>{{ bodyMass }}</base-td>
                     <base-td>{{ characteristicImc }}</base-td>
                   </tr>
@@ -137,7 +136,11 @@
                       ><strong class="text-protein-500">Peso</strong>
                       Ideal</base-td
                     >
-                    <base-td
+                    <base-td v-if="kgToLoseOrWin < 0"
+                      ><strong class="text-crabohydrates-400">Kg</strong> a
+                      Ganar</base-td
+                    >
+                    <base-td v-else
                       ><strong class="text-crabohydrates-400">Kg</strong> a
                       Perder</base-td
                     >
@@ -157,7 +160,7 @@
                       ></base-td
                     >
                     <base-td
-                      >{{ kgLose
+                      >{{ kgToLoseOrWinPositive
                       }}<strong class="text-crabohydrates-400">
                         Kg</strong
                       ></base-td
@@ -241,7 +244,7 @@
             <img
               v-else
               class="mt-4"
-              src="https://www.nutrasalud.es/media/uploads/noticias/alimentos_saludables.jpg"
+              src="~assets/alimentos_saludables.png"
               alt="Workflow"
             />
           </div>
@@ -295,7 +298,7 @@ export default {
           label: "Estatura: Metros (M)",
           placeholder: "Ingrese estatura",
           value: "",
-          validation: "metros"
+          validation: "metros",
         },
         {
           name: "sex",
@@ -378,39 +381,55 @@ export default {
   },
 
   computed: {
+    // IMC
     // function body mass index (IMC)
     bodyMass() {
       return Math.round(this.peso / (this.estatura * this.estatura));
     },
-  
-    
+    // characteristic of (IMC)
+    characteristicImc() {
+      if (this.bodyMass < 18.5) return "Bajo de peso";
+      if (this.bodyMass >= 18.5 && this.bodyMass <= 24.9) return "Peso normal";
+      if (this.bodyMass >= 25 && this.bodyMass <= 29.9)
+        return "Pre-obesidad o Sobrepeso";
+      if (this.bodyMass >= 30 && this.bodyMass <= 34.9)
+        return "Obesidad clase I";
+      if (this.bodyMass >= 35 && this.bodyMass <= 39.9)
+        return "Obesidad clase II";
+      if (this.bodyMass >= 40) return "Obesidad clase III";
+    },
+
+    // PESO
     //  function ideal weight
     idealWeight() {
       return Math.round(21 * (this.estatura * this.estatura));
     },
-
-         // characteristic of (IMC)
-    characteristicImc() {  
-        if (this.bodyMass < 18.5) return "Bajo de peso";            
-        if (this.bodyMass >= 18.5 && this.bodyMass <= 24.9) return "Peso normal";
-        if (this.bodyMass >= 25 && this.bodyMass <= 29.9) return "Pre-obesidad o Sobrepeso";          
-        if (this.bodyMass >= 30 && this.bodyMass <= 34.9) return "Obesidad clase I";          
-        if (this.bodyMass >= 35 && this.bodyMass <= 39.9) return "Obesidad clase II";          
-        if (this.bodyMass >= 40 ) return "Obesidad clase III";               
-    },
-
     // function kilograms to lose
-    kgLose() {
-      return (this.peso - this.idealWeight )
+    kgToLoseOrWinPositive() {
+      return this.kgToLoseOrWin < 0
+        ? this.kgToLoseOrWin * -1
+        : this.kgToLoseOrWin;
     },
-
+    kgToLoseOrWin() {
+      return this.peso - this.idealWeight;
+    },
+    // kilocalorias
+    // function of calories burned per day
     dailyCalories() {
       return Math.round(this.peso * 22 * this.ejercicio);
     },
-
+    // function of calories to be consumed per day
     caloriesConsumed() {
+      console.log(
+        this.desirableWeight,
+        this.dailyCalories,
+        this.percentageLoss
+      );
+      let percentageDiet = this.percentageLoss * this.dailyCalories;
       return Math.round(
-        this.dailyCalories - this.percentageLoss * this.dailyCalories
+        this.desirableWeight == 1
+          ? this.dailyCalories - percentageDiet
+          : this.dailyCalories + percentageDiet
       );
     },
 
@@ -449,8 +468,8 @@ export default {
   },
 
   methods: {
-    setValue(name, value, type , validation) {
-      console.log(name, value);
+    setValue(name, value, type, validation) {
+      // console.log(name, value);
       this.validate(name, type, value, validation);
       this[name] = value;
     },
@@ -463,18 +482,27 @@ export default {
     },
 
     validate(name, type, value, validation) {
+      console.log(name, type, value, validation);
       if (this.isTextOrNumber(type)) {
         if (value == "") {
           this.errors[name] = "No debe estar vacio";
         } else if (value <= 0) {
           this.errors[name] = "El valor debe ser mayor a 0";
-        } else if (validation =="metros" && value  % 1 == 0) {
-          this.errors[name] = "El valor debe ser en M";   
-        }  
-         else {
+        } else if (validation == "metros" && value % 1 == 0) {
+          this.errors[name] = "El valor debe ser en M";
+        } else {
           delete this.errors[name];
         }
       }
+      
+      if (type == "select") {
+        if (value == 0) {
+          this.errors[name] = "Escoga una opcion";
+        } else {
+          delete this.errors[name];
+        }
+      }
+      console.log(name, type, value, validation, this.errors);
     },
 
     showResults() {
@@ -488,7 +516,7 @@ export default {
         Object.keys(this.errors).length === 0
       );
     },
-  }
+  },
 };
 </script>
 
