@@ -1,269 +1,220 @@
 <template>
-  <div>
-    <div class="bg-primary-500 min-w-full px-10">
-      <div class="flex items-center h-20">
+ <base-layout>
+  <div class="col-span-10 px-14 flex items-center">
+    <div class="grid grid-cols-12 gap-1 rounded-lg">
+      <div class="col-span-5 border border-secondary-400 py-5 px-3">
+        <!-- div of the input -->
+        <h1 class="text-2xl text-center mb-5 text-primary-600">
+              Ingrese los datos para Analizar su estado nutricional
+            </h1>
+        <div class="grid grid-cols-2 gap-3">
+          <template v-for="(field, i) in fields">
+            <div
+              :key="i"
+              v-if="
+                !field.visualDependant ||
+                (field.visualDependant &&
+                  getValue(field.nameDependantValue) > 0)
+              "
+            >
+              <label v-if="Array.isArray(field.label)">{{
+                field.label[getValue(field.nameDependantValue)]
+              }}</label>
+
+              <label v-else> {{ field.label }}</label>
+
+              <!-- input -->
+              <input-nutrition
+                v-if="isTextOrNumber(field.type)"
+                :type="field.type"
+                :placeholder="field.placeholder"
+                v-model="field.value"
+                @input="
+                  (v) => setValue(field.name, v, field.type, field.validation)
+                "
+              /><!-- input End -->
+
+              <!-- select -->
+              <select-nutrition
+                v-if="field.type == 'select'"
+                v-model="field.value"
+                @change="(v) => setValue(field.name, v, field.type)"
+              >
+                <option
+                  v-for="(option, i) in field.options"
+                  :key="i"
+                  :value="option.value"
+                >
+                  {{ option.placeholder }}
+                </option>
+              </select-nutrition>
+              <!-- select End-->
+              <label class="text-red-600" v-if="errors[field.name]">{{
+                errors[field.name]
+              }}</label>
+            </div>
+          </template>
+        </div>
+        <img v-if="desirableWeight == 0" src="~assets/frutas.png" alt="Workflow" />
+      </div>
+      <div class="col-span-7 flex items-center pl-8">
+        <template v-if="!showResults()">
+          <div class="w-full">
+            <h1 class="text-2xl text-center mb-5 text-primary-600">
+              Resultados del analisis
+            </h1>
+            <!-- v-if="showResults()" -->
+            <base-table class="mt-0">
+              <base-caption
+                >Indice de Masa Corporal
+                <strong class="text-primary-500"> (IMC)</strong></base-caption
+              >
+              <tr>
+                <base-td
+                  ><strong class="text-primary-500">IMC</strong> Ideal</base-td
+                >
+                <base-td
+                  ><strong class="text-primary-500">IMC</strong> Actual</base-td
+                >
+                <base-td>Caracteristica</base-td>
+              </tr>
+
+              <tr>
+                <base-td>21</base-td>
+                <base-td>{{ bodyMass }}</base-td>
+                <base-td>{{ characteristicImc }}</base-td>
+              </tr>
+            </base-table>
+
+            <base-table>
+              <base-caption>
+                Peso a perder
+                <strong class="text-protein-500"
+                  >(kg)</strong
+                ></base-caption
+              >
+              <tr>
+                <base-td
+                  ><strong class="text-protein-500">Peso</strong>
+                  Actual</base-td
+                >
+                <base-td
+                  ><strong class="text-protein-500">Peso</strong> Ideal</base-td
+                >
+                <base-td v-if="kgToLoseOrWin < 0"
+                  ><strong class="text-protein-500">kg</strong> a
+                  Ganar</base-td 
+                >
+                <base-td v-else
+                  ><strong class="text-protein-500">kg</strong> a
+                  Perder</base-td
+                >
+              </tr>
+
+              <tr>
+                <base-td>
+                  {{ peso }}
+                  <strong class="text-protein-500">kg</strong></base-td
+                >
+                <base-td
+                  >{{ idealWeight }}
+                  <strong class="text-protein-500">kg</strong></base-td
+                >
+                <base-td
+                  >{{ kgToLoseOrWinPositive
+                  }}<strong class="text-protein-500"> kg</strong></base-td
+                >
+              </tr>
+            </base-table>
+
+            <base-table>
+              <base-caption
+                >Kilocalorías
+                <strong class="text-grease-600"> (Kcal)</strong></base-caption
+              >
+
+              <tr>
+                <base-td>
+                  <strong class="text-grease-600"> Kcal</strong> quemada al
+                  dia</base-td
+                >
+                <base-td
+                  ><strong class="text-grease-600"> Kcal</strong> a consumida al
+                  dia</base-td
+                >
+              </tr>
+
+              <tr>
+                <base-td>{{ dailyCalories }}</base-td>
+                <base-td> {{ caloriesConsumed }}</base-td>
+              </tr>
+            </base-table>
+
+            <base-table>
+              <base-caption
+                >Gramos
+                <strong class="text-protein-500"> (g)</strong> equivalentes a
+                <strong class="text-grease-600"> Kcal</strong>
+              </base-caption>
+              <tr>
+                <base-td
+                  ><strong class="text-protein-400">Proteínas </strong> /
+                  <strong class="text-grease-600"> Kcal</strong>
+                </base-td>
+                <base-td
+                  ><strong class="text-grease-500">Grasas </strong> /
+                  <strong class="text-grease-600"> Kcal</strong>
+                </base-td>
+                <base-td
+                  ><strong class="text-crabohydrates-500">Carbohidratos</strong>
+                  / <strong class="text-grease-600"> Kcal</strong>
+                </base-td>
+              </tr>
+
+              <tr>
+                <base-td
+                  >{{ proteinsToConsume }}
+                  <strong class="text-protein-500">g</strong> /
+                  {{ caloriesForProtein
+                  }}<strong class="text-grease-600"> Kcal</strong></base-td
+                >
+                <base-td
+                  >{{ greaseToConsume }}
+                  <strong class="text-protein-500">g</strong> /
+                  {{ caloriesForGrease
+                  }}<strong class="text-grease-600"> Kcal</strong></base-td
+                >
+                <base-td
+                  >{{ carbohydratesToConsume }}
+                  <strong class="text-protein-500">g</strong> /
+                  {{ caloriesForCarbohydrates
+                  }}<strong class="text-grease-600"> Kcal</strong></base-td
+                >
+              </tr>
+            </base-table>
+          </div>
+        </template>
+
         <img
-          class="h-8 w-8"
-          src="https://tailwindui.com/img/logos/workflow-mark-indigo-500.svg"
+          v-else
+          class="mt-4"
+          src="~assets/alimentos_saludables.png"
           alt="Workflow"
         />
       </div>
     </div>
-
-    <div style="height: 88vh" class="grid grid-cols-12">
-      <!-- Sidebar -->
-      <div class="col-span-2 bg-primary-500 py-8 px-4">
-        <h1 class="text-3xl font-bold text-white pb-7">Dashboard</h1>
-        <div class="ml-2 flex space-x-4">
-          <a
-            href="#"
-            class="
-              text-gray-900
-              hover:bg-gray-700 hover:text-white
-              rounded-md
-              text-sm
-              font-medium
-            "
-            >Calorias diarias</a
-          >
-        </div>
-      </div>
-      <!-- Sidebar  End-->
-
-      <div class="col-span-10 px-14 flex items-center">
-        <div class="grid grid-cols-12 gap-1 rounded-lg">
-          <div class="col-span-5 border border-secondary-400 py-5 px-3">
-            <!-- div of the input -->
-            <div class="grid grid-cols-2 gap-3">
-              <template v-for="(field, i) in fields">
-                <div
-                  :key="i"
-                  v-if="
-                    !field.visualDependant ||
-                    (field.visualDependant &&
-                      getValue(field.nameDependantValue) > 0)
-                  "
-                >
-                  <label v-if="Array.isArray(field.label)">{{
-                    field.label[getValue(field.nameDependantValue)]
-                  }}</label>
-
-                  <label v-else> {{ field.label }}</label>
-
-                  <!-- input -->
-                  <input-nutrition
-                    v-if="isTextOrNumber(field.type)"
-                    :type="field.type"
-                    :placeholder="field.placeholder"
-                    v-model="field.value"
-                    @input="
-                      (v) =>
-                        setValue(field.name, v, field.type, field.validation)
-                    "
-                  /><!-- input End -->
-
-                  <!-- select -->
-                  <select-nutrition
-                    v-if="field.type == 'select'"
-                    v-model="field.value"
-                    @change="(v) => setValue(field.name, v, field.type)"
-                  >
-                    <option
-                      v-for="(option, i) in field.options"
-                      :key="i"
-                      :value="option.value"
-                    >
-                      {{ option.placeholder }}
-                    </option> 
-                  </select-nutrition>
-                    <!-- select End-->
-                  <label class="text-red-600" v-if="errors[field.name]">{{
-                    errors[field.name]
-                  }}</label>
-                </div>
-              </template>
-            </div>
-
-            <img src="~assets/frutas.png" alt="Workflow" />
-          </div>
-
-          <div class="col-span-7 flex items-center pl-8">
-            <template v-if="showResults()">
-              <div class="w-full">
-                <h1 class="text-2xl text-center mb-5 text-primary-600">
-                  Resultados del analisis
-                </h1>
-                <!-- v-if="showResults()" -->
-                <base-table class="mt-0">
-                  <base-caption
-                    >Indice de Masa Corporal
-                    <strong class="text-primary-500">
-                      (IMC)</strong
-                    ></base-caption
-                  >
-                  <tr>
-                    <base-td
-                      ><strong class="text-primary-500">IMC</strong>
-                      Ideal</base-td
-                    >
-                    <base-td
-                      ><strong class="text-primary-500">IMC</strong>
-                      Actual</base-td
-                    >
-                    <base-td>Caracteristica</base-td>
-                  </tr>
-
-                  <tr>
-                    <base-td>21</base-td>
-                    <base-td>{{ bodyMass }}</base-td>
-                    <base-td>{{ characteristicImc }}</base-td>
-                  </tr>
-                </base-table>
-
-                <base-table>
-                  <base-caption>
-                    Peso a perder
-                    <strong class="text-crabohydrates-400"
-                      >(Kg)</strong
-                    ></base-caption
-                  >
-                  <tr>
-                    <base-td
-                      ><strong class="text-protein-500">Peso</strong>
-                      Actual</base-td
-                    >
-                    <base-td
-                      ><strong class="text-protein-500">Peso</strong>
-                      Ideal</base-td
-                    >
-                    <base-td v-if="kgToLoseOrWin < 0"
-                      ><strong class="text-crabohydrates-400">Kg</strong> a
-                      Ganar</base-td
-                    >
-                    <base-td v-else
-                      ><strong class="text-crabohydrates-400">Kg</strong> a
-                      Perder</base-td
-                    >
-                  </tr>
-
-                  <tr>
-                    <base-td>
-                      {{ peso }}
-                      <strong class="text-crabohydrates-400"
-                        >Kg</strong
-                      ></base-td
-                    >
-                    <base-td
-                      >{{ idealWeight }}
-                      <strong class="text-crabohydrates-400"
-                        >Kg</strong
-                      ></base-td
-                    >
-                    <base-td
-                      >{{ kgToLoseOrWinPositive
-                      }}<strong class="text-crabohydrates-400">
-                        Kg</strong
-                      ></base-td
-                    >
-                  </tr>
-                </base-table>
-
-                <base-table>
-                  <base-caption
-                    >Kilocalorías
-                    <strong class="text-grease-600">
-                      (Kcal)</strong
-                    ></base-caption
-                  >
-
-                  <tr>
-                    <base-td>
-                      <strong class="text-grease-600"> Kcal</strong> quemada al
-                      dia</base-td
-                    >
-                    <base-td
-                      ><strong class="text-grease-600"> Kcal</strong> a
-                      consumida al dia</base-td
-                    >
-                  </tr>
-
-                  <tr>
-                    <base-td>{{ dailyCalories }}</base-td>
-                    <base-td> {{ caloriesConsumed }}</base-td>
-                  </tr>
-                </base-table>
-
-                <base-table>
-                  <base-caption
-                    >Gramos
-                    <strong class="text-protein-500"> (gr)</strong> equivalentes
-                    a
-                    <strong class="text-grease-600"> Kcal</strong>
-                  </base-caption>
-                  <tr>
-                    <base-td
-                      ><strong class="text-protein-400">Proteínas </strong> /
-                      <strong class="text-grease-600"> Kcal</strong>
-                    </base-td>
-                    <base-td
-                      ><strong class="text-grease-500">Grasas </strong> /
-                      <strong class="text-grease-600"> Kcal</strong>
-                    </base-td>
-                    <base-td
-                      ><strong class="text-crabohydrates-500"
-                        >Carbohidratos</strong
-                      >
-                      / <strong class="text-grease-600"> Kcal</strong>
-                    </base-td>
-                  </tr>
-
-                  <tr>
-                    <base-td
-                      >{{ proteinsToConsume }}
-                      <strong class="text-protein-500">gr</strong> /
-                      {{ caloriesForProtein
-                      }}<strong class="text-grease-600"> Kcal</strong></base-td
-                    >
-                    <base-td
-                      >{{ greaseToConsume }}
-                      <strong class="text-protein-500">gr</strong> /
-                      {{ caloriesForGrease
-                      }}<strong class="text-grease-600"> Kcal</strong></base-td
-                    >
-                    <base-td
-                      >{{ carbohydratesToConsume }}
-                      <strong class="text-protein-500">gr</strong> /
-                      {{ caloriesForCarbohydrates
-                      }}<strong class="text-grease-600"> Kcal</strong></base-td
-                    >
-                  </tr>
-                </base-table>
-              </div>
-            </template>
-
-            <img
-              v-else
-              class="mt-4"
-              src="~assets/alimentos_saludables.png"
-              alt="Workflow"
-            />
-          </div>
-        </div>
-      </div>
-
-      <!-- /End replace -->
-    </div>
   </div>
+  </base-layout>
 </template>
 
-
 <script>
-import Arrow from "@/Components/Icons/Arrow";
-import InputNutrition from "@/Components/InputNutrition";
-import SelectNutrition from "@/Components/SelectNutrition";
-import BaseTable from "@/Components/BaseTable";
-import BaseCaption from "@/Components/BaseCaption";
-import BaseTd from "@/Components/BaseTd";
+import Arrow from "@/components/Icons/Arrow";
+import InputNutrition from "@/components/InputNutrition";
+import SelectNutrition from "@/components/SelectNutrition";
+import BaseTable from "@/components/BaseTable";
+import BaseCaption from "@/components/BaseCaption";
+import BaseTd from "@/components/BaseTd";
+import BaseLayout from "@/layout/BaseLayout";
 
 export default {
   components: {
@@ -273,6 +224,7 @@ export default {
     BaseTable,
     BaseCaption,
     BaseTd,
+    BaseLayout
   },
 
   data() {
@@ -494,7 +446,7 @@ export default {
           delete this.errors[name];
         }
       }
-      
+
       if (type == "select") {
         if (value == 0) {
           this.errors[name] = "Escoga una opcion";
